@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package azkaban;
+
+option java_package = "azkaban.proto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+message EmailConfig {
+  // Emails to notify during a failure.
+  repeated string failure_emails = 1;
+
+  // Emails to notify during a success.
+  repeated string success_emails = 2;
+
+  // Emails to notify during either a success or failure.
+  repeated string notify_emails = 3;
+}
+
+message JobConfig {
+  // The name of the job.
+  string name = 1;
+
+  // The string type of the job.
+  string type = 2;
+
+  // The names of the jobs this job depends on.
+  repeated string deps = 3;
+
+  // The configuration for specialized job types.
+  google.protobuf.Any options = 4;
+
+  // The number of retries that will automatically be attempted for failed jobs.
+  int32 retries = 5;
+
+  // The millisec time between each retry attempt.
+  int64 retry_backoff = 6;
+
+  // Override the working directory for the execution. By default, this is the
+  // directory that contains the job file that is being run.
+  string working_dir = 7;
+
+  // Map for setting environment variables.
+  map<string, string> env_variables = 8;
+
+  // Configuration for email notifications.
+  EmailConfig email_config = 9;
+}
+
+message ShellJobConfig {
+  // The shell command to run.
+  string command = 1;
+}
+
+message JavaProcessJobConfig {
+  // The main Java class to run.
+  string java_class = 1;
+
+  // Java properties to be passed to the process.
+  map<string, string> properties = 2;
+}
+
+message FlowJobConfig {
+  // The name of the flow to embed.
+  string flow_name = 1;
+}
+
+message FlowConfig {
+  // The name of the flow.
+  // TODO(dzc): Currently, this does not do anything because Azkaban currently
+  // does not support setting custom flow names. Remove this comment once
+  // Azkaban supports custom flow names.
+  string name = 1;
+
+  // Jobs that are part of this flow.
+  repeated JobConfig jobs = 2;
+}
+
+message ProjectConfig {
+  // The name of the project.
+  string name = 1;
+
+  // Description for the project.
+  string description = 2;
+
+  // Flows that are part of the project.
+  repeated FlowConfig flows = 3;
+}

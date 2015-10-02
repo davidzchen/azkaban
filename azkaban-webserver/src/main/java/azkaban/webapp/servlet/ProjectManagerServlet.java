@@ -1615,13 +1615,12 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
       final String contentType = item.getContentType();
       if (contentType != null
           && (contentType.startsWith(APPLICATION_ZIP_MIME_TYPE)
-              || contentType.startsWith("application/x-zip-compressed") || contentType
-                .startsWith("application/octet-stream"))) {
+              || contentType.startsWith("application/x-zip-compressed")
+              || contentType.startsWith("application/octet-stream"))) {
         type = "zip";
       } else {
         item.delete();
         ret.put("error", "File type " + contentType + " unrecognized.");
-
         return;
       }
 

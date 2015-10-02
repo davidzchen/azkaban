@@ -1,0 +1,125 @@
+{
+  "name": "embedded_flows",
+  "flows": [
+    {
+      "name": "embedded",
+      "jobs": [
+        {
+          "name": "job_a",
+          "type": "javaprocess",
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        },
+        {
+          "name": "job_b",
+          "type": "flow",
+          "deps": [":job_a"],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.FlowJobConfig",
+            "flowName": "inner_flow"
+          }
+        },
+        {
+          "name": "job_c",
+          "type": "flow",
+          "deps": [":job_a"],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.FlowJobConfig",
+            "flowName": "inner_flow"
+          }
+        },
+        {
+          "name": "job_d",
+          "type": "flow",
+          "deps": [":job_a"],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.FlowJobConfig",
+            "flowName": "inner_flow"
+          }
+        },
+        {
+          "name": "job_e",
+          "type": "javaprocess",
+          "deps": [
+            ":job_b",
+            ":job_c",
+            ":job_d"
+          ],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "inner_flow",
+      "jobs": [
+        {
+          "name": "inner_job_a",
+          "type": "javaprocess",
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        },
+        {
+          "name": "inner_job_b",
+          "type": "javaprocess",
+          "deps": [":inner_job_a"],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        },
+        {
+          "name": "inner_job_c",
+          "type": "javaprocess",
+          "deps": [":inner_job_a"],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        },
+        {
+          "name": "inner_job_d",
+          "type": "javaprocess",
+          "deps": [
+            ":inner_job_b",
+            ":inner_job_c"
+          ],
+          "options": {
+            "@type": "type.googleapis.com/azkaban.JavaProcessJobConfig",
+            "javaClass": "azkaban.test.executor.SleepJavaJob",
+            "properties": {
+              "seconds": "1",
+              "fail": "false"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

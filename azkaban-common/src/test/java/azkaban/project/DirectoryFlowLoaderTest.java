@@ -20,6 +20,12 @@ import java.io.File;
 import java.net.URL;
 import java.net.URISyntaxException;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+
+import azkaban.proto.JobConfig;
+import azkaban.proto.JavaProcessJobConfig;
 import azkaban.test.executions.TestExecutions;
 import azkaban.utils.Props;
 
@@ -36,13 +42,21 @@ public class DirectoryFlowLoaderTest {
     project = new Project(11, "myTestProject");
   }
 
+  private void printErrors(DirectoryFlowLoader loader) {
+    for (String error : loader.getErrors()) {
+      System.out.println(error);
+    }
+  }
+
   @Test
   public void testDirectoryLoad() throws URISyntaxException {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, TestExecutions.getFlowDir("exectest1"));
-    logger.info(loader.getFlowMap().size());
+    loader.load(project, TestExecutions.getFlowDir("exectest1"));
+    printErrors(loader);
+    Assert.assertEquals(0, loader.getErrors().size());
+    Assert.assertEquals(5, loader.getFlowMap().size());
   }
 
   @Test
@@ -50,7 +64,8 @@ public class DirectoryFlowLoaderTest {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, TestExecutions.getFlowDir("embedded"));
+    loader.load(project, TestExecutions.getFlowDir("embedded"));
+    printErrors(loader);
     Assert.assertEquals(0, loader.getErrors().size());
   }
 
@@ -59,12 +74,53 @@ public class DirectoryFlowLoaderTest {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, TestExecutions.getFlowDir("embedded_bad"));
-    for (String error : loader.getErrors()) {
-      System.out.println(error);
-    }
+    loader.load(project, TestExecutions.getFlowDir("embedded_bad"));
+    printErrors(loader);
 
     // Should be 3 errors: jobe->innerFlow, innerFlow->jobe, innerFlow
     Assert.assertEquals(3, loader.getErrors().size());
+  }
+
+  @Test
+  public void testJsonProjectConfig() throws InvalidProtocolBufferException {
+    JavaProcessJobConfig.Builder builder = JavaProcessJobConfig.newBuilder()
+        .setJavaClass("azkaban.test.executor.SleepJavaJob");
+    builder.getMutableProperties().put("seconds", "1");
+    JavaProcessJobConfig specificConfig = builder.build();
+
+    JobConfig jobConfig = JobConfig.newBuilder()
+        .setName("foo")
+        .setType("javaprocess")
+        .setOptions(Any.pack(specificConfig))
+        .build();
+
+    JsonFormat.TypeRegistry registry = JsonFormat.TypeRegistry.newBuilder()
+        .add(JavaProcessJobConfig.getDescriptor()).build();
+    JsonFormat.Printer printer = JsonFormat.printer().usingTypeRegistry(registry);
+
+    Assert.assertEquals(
+        "{\n" +
+        "  \"name\": \"foo\",\n" +
+        "  \"type\": \"javaprocess\",\n" +
+        "  \"options\": {\n" +
+        "    \"@type\": \"type.googleapis.com/azkaban.JavaProcessJobConfig\",\n" +
+        "    \"javaClass\": \"azkaban.test.executor.SleepJavaJob\",\n" +
+        "    \"properties\": {\n" +
+        "      \"seconds\": \"1\"\n" +
+        "    }\n" +
+        "  }\n" +
+        "}",
+        printer.print(jobConfig));
+  }
+
+  @Test
+  public void testLoadJsonFlow() throws URISyntaxException {
+    Logger logger = Logger.getLogger(this.getClass());
+    DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
+
+    loader.load(project, TestExecutions.getFlowDir("embedded_json"));
+    printErrors(loader);
+    Assert.assertEquals(0, loader.getErrors().size());
+    Assert.assertEquals(2, loader.getFlowMap().size());
   }
 }

@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import azkaban.project.DirectoryFlowLoader;
+import azkaban.flow.JobDefaults;
 import azkaban.server.AzkabanServer;
 import azkaban.utils.Pair;
 import azkaban.utils.Props;
@@ -160,8 +160,8 @@ public class JavaProcessJob extends ProcessJob {
 
     Props azkabanProperties = AzkabanServer.getAzkabanProperties();
     if (azkabanProperties != null) {
-      String maxXms = azkabanProperties.getString(DirectoryFlowLoader.JOB_MAX_XMS, DirectoryFlowLoader.MAX_XMS_DEFAULT);
-      String maxXmx = azkabanProperties.getString(DirectoryFlowLoader.JOB_MAX_XMX, DirectoryFlowLoader.MAX_XMX_DEFAULT);
+      String maxXms = azkabanProperties.getString(JobDefaults.JOB_MAX_XMS, JobDefaults.MAX_XMS_DEFAULT);
+      String maxXmx = azkabanProperties.getString(JobDefaults.JOB_MAX_XMX, JobDefaults.MAX_XMX_DEFAULT);
       long sizeMaxXms = Utils.parseMemString(maxXms);
       long sizeMaxXmx = Utils.parseMemString(maxXmx);
 
