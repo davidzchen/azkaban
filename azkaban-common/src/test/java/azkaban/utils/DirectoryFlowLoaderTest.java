@@ -17,42 +17,57 @@
 package azkaban.utils;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URISyntaxException;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 
 import azkaban.project.Project;
 
 public class DirectoryFlowLoaderTest {
+  private Project project;
 
-  Project project = new Project(11, "myTestProject");
+  @Before
+  public void setUp() {
+    project = new Project(11, "myTestProject");
+  }
 
-  @Ignore @Test
-  public void testDirectoryLoad() {
+  private File getParentDirFile(final String path) throws URISyntaxException {
+    URL url = getClass().getResource(path);
+    Assert.assertNotNull(url);
+    File resourceFile = new File(url.toURI());
+    File parentDir = resourceFile.getParentFile();
+    Assert.assertTrue(parentDir.isDirectory());
+    return parentDir;
+  }
+
+  @Test
+  public void testDirectoryLoad() throws Exception {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, new File("unit/executions/exectest1"));
+    loader.loadProjectFlow(project, getParentDirFile("exectest1/job1.job"));
     logger.info(loader.getFlowMap().size());
   }
 
-  @Ignore @Test
-  public void testLoadEmbeddedFlow() {
+  @Test
+  public void testLoadEmbeddedFlow() throws Exception {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, new File("unit/executions/embedded"));
+    loader.loadProjectFlow(project, getParentDirFile("embedded/joba.job"));
     Assert.assertEquals(0, loader.getErrors().size());
   }
 
-  @Ignore @Test
-  public void testRecursiveLoadEmbeddedFlow() {
+  @Test
+  public void testRecursiveLoadEmbeddedFlow() throws Exception {
     Logger logger = Logger.getLogger(this.getClass());
     DirectoryFlowLoader loader = new DirectoryFlowLoader(new Props(), logger);
 
-    loader.loadProjectFlow(project, new File("unit/executions/embeddedBad"));
+    loader.loadProjectFlow(project, getParentDirFile("embedded_bad/joba.job"));
     for (String error : loader.getErrors()) {
       System.out.println(error);
     }
