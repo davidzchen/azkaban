@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package azkaban.config;
+
+option java_package = "azkaban.config";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+message ServerConfig {
+  string name = 1;
+  string label = 2;
+  string color = 3;
+  string default_servlet_path = 4;
+  string web_resource_dir = 5;
+  string default_timezone_id = 6;
+  bool velocity_dev_mode = 7;
+}
+
+message UserManagerConfig {
+  string class = 1;
+  string xml_file = 2;
+}
+
+message ProjectLoaderConfig {
+  string executor_global_properties = 1;
+  string project_dir = 2;
+  bool lockdown_create_projects: 3;
+}
+
+message MysqlDatabaseConfig {
+  int32 port = 1;
+  string host = 2;
+  string database = 3;
+  string user = 4;
+  string password = 5;
+  string num_connections = 6;
+}
+
+message DatabaseConfig {
+  string database_type = 1;
+  google.protobuf.Any options = 2;
+}
+
+message JettyConfig {
+  int32 max_threads = 1;
+  int32 ssl_port = 2;
+  int32 port = 3;
+  string key_store = 4;
+  string password = 5;
+  string key_password = 6;
+  string trust_store = 7;
+  string trust_password = 8;
+  repeated string exclude_cipher_suites = 9;
+}
+
+message MailConfig {
+  string sender = 1;
+  string host = 2;
+  string job_failure_email = 3;
+  string job_failure_email = 4;
+}
+
+message ExecutorConfig {
+  int32 executor_port = 1;
+}
+
+message SchedulerStatsConfig {
+  string cache_directory = 1;
+}
+
+message JmxConfig {
+  bool jetty_connector_stats = 1;
+  bool executor_connector_stats = 2;
+}
+
+message WebserverConfig {
+  ServerConfig = 1;
+  UserManagerConfig user_manager_config = 2;
+  ProjectLoaderConfig = 3;
+  DatabaseConfig database_config = 4;
+  JettyConfig jetty_config = 5;
+  MailConfig mail_config = 6;
+  ExecutorConfig executor_config = 7;
+  SchedulerStatsConfig scheduler_stats_config = 8;
+  JmxConfig jmx_config = 9;
+}
